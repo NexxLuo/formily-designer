@@ -40,8 +40,7 @@ export default {
   },
   resolve: {
     modules: ['node_modules'],
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-    alias: getWorkspaceAlias(),
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
   },
   externals: {
     react: 'React',

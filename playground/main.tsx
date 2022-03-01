@@ -1,6 +1,6 @@
-import 'antd/dist/antd.less'
-import React, { useMemo } from 'react'
-import ReactDOM from 'react-dom'
+import "antd/dist/antd.less";
+import React, { useMemo } from "react";
+import ReactDOM from "react-dom";
 import {
   Designer,
   DesignerToolsWidget,
@@ -16,26 +16,33 @@ import {
   ViewportPanel,
   ViewPanel,
   SettingsPanel,
-  ComponentTreeWidget,
-} from '@designable/react'
+  ComponentTreeWidget
+} from "@designable/react";
 import {
   SettingsForm,
-  setNpmCDNRegistry,
-} from '@designable/react-settings-form'
+  setNpmCDNRegistry
+} from "@designable/react-settings-form";
 import {
   createDesigner,
   GlobalRegistry,
   Shortcut,
-  KeyCode,
-} from '@designable/core'
+  KeyCode
+} from "@designable/core";
+import {
+  RemoveNodeEvent,
+  InsertAfterEvent,
+  InsertBeforeEvent,
+  PrependNodeEvent,
+  AppendNodeEvent
+} from "@designable/core";
 import {
   LogoWidget,
   ActionsWidget,
   PreviewWidget,
   SchemaEditorWidget,
-  MarkupSchemaWidget,
-} from './widgets'
-import { saveSchema } from './service'
+  MarkupSchemaWidget
+} from "./widgets";
+import { saveSchema } from "./service";
 import {
   Form,
   Field,
@@ -63,98 +70,70 @@ import {
   FormTab,
   FormCollapse,
   FormLayout,
-  FormGrid,
-} from '../src'
-
-setNpmCDNRegistry('//unpkg.com')
+  FormGrid
+} from "../src";
+import { transformToSchema } from "@designable/formily-transformer";
+setNpmCDNRegistry("//unpkg.com");
 
 GlobalRegistry.registerDesignerLocales({
-  'zh-CN': {
+  "zh-CN": {
     sources: {
-      Inputs: '输入控件',
-      Layouts: '布局组件',
-      Arrays: '自增组件',
-      Displays: '展示组件',
-    },
+      Inputs: "输入控件",
+      Layouts: "布局组件",
+      Arrays: "自增组件",
+      Displays: "展示组件"
+    }
   },
-  'en-US': {
+  "en-US": {
     sources: {
-      Inputs: 'Inputs',
-      Layouts: 'Layouts',
-      Arrays: 'Arrays',
-      Displays: 'Displays',
-    },
+      Inputs: "Inputs",
+      Layouts: "Layouts",
+      Arrays: "Arrays",
+      Displays: "Displays"
+    }
   },
-  'ko-KR': {
+  "ko-KR": {
     sources: {
-      Inputs: '입력',
-      Layouts: '레이아웃',
-      Arrays: '배열',
-      Displays: '디스플레이',
-    },
-  },
-})
+      Inputs: "입력",
+      Layouts: "레이아웃",
+      Arrays: "배열",
+      Displays: "디스플레이"
+    }
+  }
+});
 
 const App = () => {
-  const engine = useMemo(
-    () =>
-      createDesigner({
-        shortcuts: [
-          new Shortcut({
-            codes: [
-              [KeyCode.Meta, KeyCode.S],
-              [KeyCode.Control, KeyCode.S],
-            ],
-            handler(ctx) {
-              saveSchema(ctx.engine)
-            },
-          }),
-        ],
-        rootComponentName: 'Form',
-      }),
-    []
-  )
+  const engine = useMemo(() => {
+    let designer = createDesigner({
+      shortcuts: [
+        new Shortcut({
+          codes: [
+            [KeyCode.Meta, KeyCode.S],
+            [KeyCode.Control, KeyCode.S]
+          ],
+          handler(ctx) {
+            saveSchema(ctx.engine);
+          }
+        })
+      ],
+      rootComponentName: "Form"
+    });
+
+    designer.subscribeTo(InsertAfterEvent, () => {
+      let schema = transformToSchema(designer.getCurrentTree());
+      console.log("InsertAfterEvent:", schema);
+    });
+
+    return designer;
+  }, []);
   return (
     <Designer engine={engine}>
       <StudioPanel logo={<LogoWidget />} actions={<ActionsWidget />}>
         <CompositePanel>
           <CompositePanel.Item title="panels.Component" icon="Component">
-            <ResourceWidget
-              title="sources.Inputs"
-              sources={[
-                Input,
-                Password,
-                NumberPicker,
-                Rate,
-                Slider,
-                Select,
-                TreeSelect,
-                Cascader,
-                Transfer,
-                Checkbox,
-                Radio,
-                DatePicker,
-                TimePicker,
-                Upload,
-                Switch,
-                ObjectContainer,
-              ]}
-            />
-            <ResourceWidget
-              title="sources.Layouts"
-              sources={[
-                Card,
-                FormGrid,
-                FormTab,
-                FormLayout,
-                FormCollapse,
-                Space,
-              ]}
-            />
-            <ResourceWidget
-              title="sources.Arrays"
-              sources={[ArrayCards, ArrayTable]}
-            />
+            <ResourceWidget title="sources.Inputs" sources={[Input]} />
+            <ResourceWidget title="sources.Layouts" sources={[Card]} />
+            <ResourceWidget title="sources.Arrays" sources={[ArrayTable]} />
             <ResourceWidget title="sources.Displays" sources={[Text]} />
           </CompositePanel.Item>
           <CompositePanel.Item title="panels.OutlinedTree" icon="Outline">
@@ -169,10 +148,10 @@ const App = () => {
             <ToolbarPanel>
               <DesignerToolsWidget />
               <ViewToolsWidget
-                use={['DESIGNABLE', 'JSONTREE', 'MARKUP', 'PREVIEW']}
+                use={["DESIGNABLE", "JSONTREE", "MARKUP", "PREVIEW"]}
               />
             </ToolbarPanel>
-            <ViewportPanel style={{ height: '100%' }}>
+            <ViewportPanel style={{ height: "100%" }}>
               <ViewPanel type="DESIGNABLE">
                 {() => (
                   <ComponentTreeWidget
@@ -203,7 +182,7 @@ const App = () => {
                       FormCollapse,
                       FormGrid,
                       FormLayout,
-                      ObjectContainer,
+                      ObjectContainer
                     }}
                   />
                 )}
@@ -214,10 +193,10 @@ const App = () => {
                 )}
               </ViewPanel>
               <ViewPanel type="MARKUP" scrollable={false}>
-                {(tree) => <MarkupSchemaWidget tree={tree} />}
+                {tree => <MarkupSchemaWidget tree={tree} />}
               </ViewPanel>
               <ViewPanel type="PREVIEW">
-                {(tree) => <PreviewWidget tree={tree} />}
+                {tree => <PreviewWidget tree={tree} />}
               </ViewPanel>
             </ViewportPanel>
           </WorkspacePanel>
@@ -227,7 +206,7 @@ const App = () => {
         </SettingsPanel>
       </StudioPanel>
     </Designer>
-  )
-}
+  );
+};
 
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(<App />, document.getElementById("root"));
